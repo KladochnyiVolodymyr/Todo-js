@@ -10,12 +10,19 @@ function handleTasks() {}
 renderTodoList(tasks, true);
 
 function renderTodoList (tasks, renderInfo) {
-  var tasksList = document.getElementById('tasks-box');
+  var tasksBox = document.getElementById('tasks-box');
   var renderListHtml = '';
   tasks.forEach((task) => {
-    renderListHtml += `<li class="list-group-item  d-flex" data-id=${task.id}> <span class="${task.done ? 'done' : '' }">${task.title}</span> <div class="icons-box ml-auto"> <i class="fa fa-check mr-3 ${task.done ? 'done' : '' }"></i> <i  class="fa fa-trash"></i> </div> </li>`
+    renderListHtml += `
+      <li class="list-group-item  d-flex" data-id=${task.id}> 
+        <span class="${task.done ? 'done' : '' }">${task.title}</span>
+        <div class="icons-box ml-auto">
+          <i class="fa fa-check mr-3 ${task.done ? 'done' : '' }"></i>
+          <i  class="fa fa-trash"></i> 
+        </div> 
+      </li>`
   })
-  tasksList.innerHTML = renderListHtml;
+  tasksBox.innerHTML = renderListHtml;
   document.querySelectorAll('.fa-check').forEach(item => {
     item.addEventListener('click', checkHandle);
   })
@@ -39,36 +46,46 @@ function filterArr(arr, state) {
 
 function renderTodoInfo(tasks) {
   if(tasks.length) {
-    document.getElementById('tasks-info').style.display = "block"
+    document.getElementById('tasks-info').classList.remove("is-hidden");
     var tasksTotal = document.getElementById('tasks-total');
     var tasksDone = document.getElementById('tasks-done');
     var tasksRemain = document.getElementById('tasks-remain');
   
-    tasksTotal.innerHTML = tasks.length;
-    tasksDone.innerHTML = filterArr(tasks, true).length;
-    tasksRemain.innerHTML = filterArr(tasks, false).length;
+    var tasksTotalCount = tasks.length;
+    var tasksDoneCount = filterArr(tasks, true).length;
+
+    tasksTotal.innerHTML = tasksTotalCount
+    tasksDone.innerHTML = tasksDoneCount;
+    tasksRemain.innerHTML = tasksTotalCount - tasksDoneCount;
   } else {
-    document.getElementById('tasks-info').style.display = "none"
+    document.getElementById('tasks-info').classList.add("is-hidden");
   }
   
 }
 
 
-function getInputValue(e) {
+function taskFormSubmitHandler(e) {
   e.preventDefault();
   var inputValue = this.getElementsByClassName('form-control')[0].value;
-  var newTask = {
-    id: tasks.length + 1,
-    title: inputValue,
-    done: false
-  }
-  if(inputValue.length >= 5) {
-    tasks.push(newTask);
-    renderTodoList(tasks, true);
-    this.getElementsByClassName('form-control')[0].value = '';
-  } else {
+
+  if(inputValue.length < 5) {
     alert('The value must be at least 5 characters!');
+    return;
   }
+
+
+  function Task(id, title) {
+    this.id = id;
+    this.title = title;
+    this.done = false;
+  }
+
+  var newTask = new Task(tasks.length + 1, inputValue);
+
+  
+  tasks.push(newTask);
+  renderTodoList(tasks, true);
+  this.getElementsByClassName('form-control')[0].value = '';
 }
 
 function checkHandle() {
@@ -76,11 +93,8 @@ function checkHandle() {
   var currentElementTitle = currentElement.children[0];
   var currentElementId = currentElement.getAttribute('data-id');
 
-  tasks.forEach(item => {
-    if(item.id == currentElementId) {
-      item.done = !item.done;
-    }
-  });
+  var currentTask = tasks.find(item => item.id == currentElementId);
+  currentTask.done = !currentTask.done;
 
   renderTodoInfo(tasks);
   currentElementTitle.classList.toggle("done");
@@ -91,43 +105,44 @@ function deleteHandle() {
   var userConfirm = confirm('Do you want to delete this item?');
   if(userConfirm) {
     var currentElementId = this.closest('.list-group-item').getAttribute('data-id');
-    for (var i =0; i < tasks.length; i++) {
-      if (tasks[i].id == currentElementId) {
-        tasks.splice(i,1);
-      }
-    }
+    
+    var currentTask = tasks.findIndex( item => item.id == currentElementId);
+    tasks.splice(currentTask,1);
+
     renderTodoList(tasks, true);
   }
 }
 
 function filterTasks() {
+  var FILTER_VALUES = {
+    ALL: 1,
+    DONE: 2,
+    REMAIN: 3
+  }
   var filteredTasks = [];
-  if(this.value == 1) {
+
+  if(this.value == FILTER_VALUES.ALL) {
     filteredTasks = tasks;
-  } else if (this.value == 2) {
+  } else if (this.value == FILTER_VALUES.DONE) {
     filteredTasks = tasks.filter(item => item.done == true);
   } else {
     filteredTasks = tasks.filter(item => item.done == false);
   }
+
   renderTodoList(filteredTasks, false);
 }
 
 
 function searchTasks() {
   var searchFor = this.value.toLowerCase();
-  var searchResults = [];
 
-  for(var i=0; i < tasks.length; i++){
-    if(tasks[i].title.toLowerCase().indexOf(searchFor) > -1) {
-      searchResults.push( { id: tasks[i].id, title: tasks[i].title, done: tasks[i].done });
-    }
-  }
+  var searchResults = tasks.filter((item, index) => item.title.toLowerCase().indexOf(searchFor) > -1);
 
   renderTodoList(searchResults, false);
 }
 
 //new task submit form
-document.getElementById('task-form').addEventListener('submit', getInputValue);
+document.getElementById('task-form').addEventListener('submit', taskFormSubmitHandler);
 
 document.getElementById('filter-tasks').addEventListener("change", filterTasks);
 

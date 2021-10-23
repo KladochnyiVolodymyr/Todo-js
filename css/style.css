@@ -63,3 +63,7 @@
     background: transparent;
     padding: .3rem;
 }
+
+.is-hidden {
+    display: none;
+}
