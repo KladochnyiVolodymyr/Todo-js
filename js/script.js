@@ -45,24 +45,31 @@ function filterArr(arr, state) {
 
 
 function renderTodoInfo(tasks) {
-  if(tasks.length) {
-    document.getElementById('tasks-info').classList.remove("is-hidden");
-    var tasksTotal = document.getElementById('tasks-total');
-    var tasksDone = document.getElementById('tasks-done');
-    var tasksRemain = document.getElementById('tasks-remain');
-  
-    var tasksTotalCount = tasks.length;
-    var tasksDoneCount = filterArr(tasks, true).length;
 
-    tasksTotal.innerHTML = tasksTotalCount
-    tasksDone.innerHTML = tasksDoneCount;
-    tasksRemain.innerHTML = tasksTotalCount - tasksDoneCount;
-  } else {
+  if(tasks.length === 0) {
     document.getElementById('tasks-info').classList.add("is-hidden");
+    return;
   }
+
+  document.getElementById('tasks-info').classList.remove("is-hidden");
+  var tasksTotal = document.getElementById('tasks-total');
+  var tasksDone = document.getElementById('tasks-done');
+  var tasksRemain = document.getElementById('tasks-remain');
+
+  var tasksTotalCount = tasks.length;
+  var tasksDoneCount = filterArr(tasks, true).length;
+
+  tasksTotal.innerHTML = tasksTotalCount
+  tasksDone.innerHTML = tasksDoneCount;
+  tasksRemain.innerHTML = tasksTotalCount - tasksDoneCount;
   
 }
 
+function Task(id, title) {
+  this.id = id;
+  this.title = title;
+  this.done = false;
+}
 
 function taskFormSubmitHandler(e) {
   e.preventDefault();
@@ -71,13 +78,6 @@ function taskFormSubmitHandler(e) {
   if(inputValue.length < 5) {
     alert('The value must be at least 5 characters!');
     return;
-  }
-
-
-  function Task(id, title) {
-    this.id = id;
-    this.title = title;
-    this.done = false;
   }
 
   var newTask = new Task(tasks.length + 1, inputValue);
