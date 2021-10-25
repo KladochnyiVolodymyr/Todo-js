@@ -23,12 +23,20 @@ function renderTodoList (tasks, renderInfo) {
       </li>`
   })
   tasksBox.innerHTML = renderListHtml;
-  document.querySelectorAll('.fa-check').forEach(item => {
-    item.addEventListener('click', checkHandle);
-  })
-  document.querySelectorAll('.fa-trash').forEach(item => {
-    item.addEventListener('click', deleteHandle);
-  })
+  //document.querySelectorAll('.fa-check').forEach(item => {
+    //item.addEventListener('click', checkHandle);
+  //})
+  document.getElementById('tasks-box').onclick = function(event) {
+    if (!event.target.classList.contains('fa-check')) return;
+    checkHandle(event.target);
+  }
+  //document.querySelectorAll('.fa-trash').forEach(item => {
+    //item.addEventListener('click', deleteHandle);
+  //})
+  document.getElementById('tasks-box').onclick = function(event) {
+    if (!event.target.classList.contains('fa-trash')) return;
+    deleteHandle(event.target);
+  }
 
   if(renderInfo) {
     renderTodoInfo(tasks);
@@ -88,8 +96,8 @@ function taskFormSubmitHandler(e) {
   this.getElementsByClassName('form-control')[0].value = '';
 }
 
-function checkHandle() {
-  var currentElement = this.closest('.list-group-item');
+function checkHandle(elem) {
+  var currentElement = elem.closest('.list-group-item');
   var currentElementTitle = currentElement.children[0];
   var currentElementId = currentElement.getAttribute('data-id');
 
@@ -98,13 +106,13 @@ function checkHandle() {
 
   renderTodoInfo(tasks);
   currentElementTitle.classList.toggle("done");
-  this.classList.toggle("done");
+  elem.classList.toggle("done");
 }
 
-function deleteHandle() {
+function deleteHandle(elem) {
   var userConfirm = confirm('Do you want to delete this item?');
   if(userConfirm) {
-    var currentElementId = this.closest('.list-group-item').getAttribute('data-id');
+    var currentElementId = elem.closest('.list-group-item').getAttribute('data-id');
     
     var currentTask = tasks.findIndex( item => item.id == currentElementId);
     tasks.splice(currentTask,1);
